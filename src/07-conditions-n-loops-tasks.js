@@ -218,8 +218,10 @@ function findFirstSingleChar(str) {
  *   5, 3, true, true   => '[3, 5]'
  *
  */
-function getIntervalString(/* a, b, isStartIncluded, isEndIncluded */) {
-  throw new Error('Not implemented');
+function getIntervalString(a, b, isStartIncluded, isEndIncluded) {
+  const start = (isStartIncluded === true) ? '[' : '(';
+  const end = (isEndIncluded === true) ? ']' : ')';
+  return start + [a, b].sort((x, y) => x - y).join(', ') + end;
 }
 
 
@@ -235,8 +237,8 @@ function getIntervalString(/* a, b, isStartIncluded, isEndIncluded */) {
  * 'rotator' => 'rotator'
  * 'noon' => 'noon'
  */
-function reverseString(/* str */) {
-  throw new Error('Not implemented');
+function reverseString(str) {
+  return str.split('').reverse().join('');
 }
 
 
@@ -252,8 +254,8 @@ function reverseString(/* str */) {
  *   87354 => 45378
  *   34143 => 34143
  */
-function reverseInteger(/* num */) {
-  throw new Error('Not implemented');
+function reverseInteger(num) {
+  return +num.toString().split('').reverse().join('');
 }
 
 
@@ -277,8 +279,23 @@ function reverseInteger(/* num */) {
  *   5436468789016589 => false
  *   4916123456789012 => false
  */
-function isCreditCardNumber(/* ccn */) {
-  throw new Error('Not implemented');
+function isCreditCardNumber(ccn) {
+  const ccnNumbers = [...ccn.toString()].map(Number);
+  const result = [];
+
+  const count = (num) => ((num * 2 > 9) ? num * 2 - 9 : num * 2);
+
+  if (ccnNumbers.length % 2 === 0) {
+    ccnNumbers.forEach((el, index) => {
+      result.push(((index + 1) % 2 !== 0) ? count(el) : el);
+    });
+  } else {
+    ccnNumbers.forEach((el, index) => {
+      result.push(((index + 1) % 2 === 0) ? count(el) : el);
+    });
+  }
+
+  return (result.reduce((s, n) => s + n) % 10 === 0);
 }
 
 /**
@@ -295,8 +312,9 @@ function isCreditCardNumber(/* ccn */) {
  *   10000 ( 1+0+0+0+0 = 1 ) => 1
  *   165536 (1+6+5+5+3+6 = 26,  2+6 = 8) => 8
  */
-function getDigitalRoot(/* num */) {
-  throw new Error('Not implemented');
+function getDigitalRoot(num) {
+  const sum = num.toString().split('').map((el) => +el).reduce((s, n) => s + n, 0);
+  return (sum < 9) ? sum : getDigitalRoot(sum);
 }
 
 
@@ -321,8 +339,29 @@ function getDigitalRoot(/* num */) {
  *   '{)' = false
  *   '{[(<{[]}>)]}' = true
  */
-function isBracketsBalanced(/* str */) {
-  throw new Error('Not implemented');
+function isBracketsBalanced(str) {
+  const stack = [];
+  const arr = str.split('');
+  const openBrackets = ['[', '{', '(', '<'];
+
+  if (arr.length % 2 !== 0) return false;
+
+  arr.forEach((el) => {
+    if (openBrackets.includes(el)) {
+      stack.push(el);
+    } else if (stack.length > 0) {
+      const last = stack.at(-1);
+      if ((last === '[' && el === ']') || (last === '{' && el === '}')
+          || (last === '(' && el === ')') || (last === '<' && el === '>')) {
+        stack.pop();
+      } else {
+        return false;
+      }
+    }
+    return false;
+  });
+
+  return !stack.length;
 }
 
 
@@ -346,8 +385,8 @@ function isBracketsBalanced(/* str */) {
  *    365, 4  => '11231'
  *    365, 10 => '365'
  */
-function toNaryString(/* num, n */) {
-  throw new Error('Not implemented');
+function toNaryString(num, n) {
+  return num.toString(n);
 }
 
 
@@ -386,8 +425,24 @@ function getCommonDirectoryPath(/* pathes */) {
  *                         [ 6 ]]
  *
  */
-function getMatrixProduct(/* m1, m2 */) {
-  throw new Error('Not implemented');
+function getMatrixProduct(m1, m2) {
+  const rows1 = m1.length;
+  const cols1 = m1[0].length;
+  const cols2 = m2[0].length;
+
+  const res = [];
+  for (let i = 0; i < rows1; i += 1) {
+    res[i] = [];
+    for (let j = 0; j < cols2; j += 1) {
+      let sum = 0;
+      for (let k = 0; k < cols1; k += 1) {
+        sum += m1[i][k] * m2[k][j];
+      }
+      res[i][j] = sum;
+    }
+  }
+
+  return res;
 }
 
 
@@ -421,8 +476,37 @@ function getMatrixProduct(/* m1, m2 */) {
  *    [    ,   ,    ]]
  *
  */
-function evaluateTicTacToePosition(/* position */) {
-  throw new Error('Not implemented');
+function evaluateTicTacToePosition(position) {
+  const winCombinations = [
+    [position[0][0], position[0][1], position[0][2]],
+    [position[1][0], position[1][1], position[1][2]],
+    [position[2][0], position[2][1], position[2][2]],
+    [position[0][0], position[1][0], position[2][0]],
+    [position[0][1], position[1][1], position[2][1]],
+    [position[0][2], position[1][2], position[2][2]],
+    [position[0][0], position[1][1], position[2][2]],
+    [position[2][0], position[1][1], position[0][2]],
+  ];
+
+  let res;
+
+  for (let i = 0; i < winCombinations.length; i += 1) {
+    const combination = winCombinations[i];
+
+    const isWinX = combination.every((currentValue) => currentValue === 'X');
+    const isWin0 = combination.every((currentValue) => currentValue === '0');
+
+    if (isWinX) {
+      res = 'X';
+      break;
+    }
+    if (isWin0) {
+      res = '0';
+      break;
+    }
+  }
+
+  return res;
 }
 
 
